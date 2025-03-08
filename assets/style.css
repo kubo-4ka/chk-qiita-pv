@@ -16,7 +16,6 @@ button {
     width: auto;
 }
 
-/* ✅ 目のアイコンのボタン背景を変更して視認性向上 */
 #toggleTokenVisibility {
     background: #444;   /* ダークグレー */
     border: 1px solid #666;
@@ -71,7 +70,6 @@ th:hover {
     right: 10px;
 }
 
-/* ✅ リンクの視認性向上 */
 a {
     color: #1E90FF;
     text-decoration: none;
@@ -82,7 +80,24 @@ a:hover {
     color: #FFD700;
 }
 
-/* ✅ 成功時に非表示にする要素 */
 .hidden {
     display: none;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #1E1E1E;
+    color: #B0B0B0;
+    font-size: 12px;
+}
+
+footer a {
+    color: #4DB6AC;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #26A69A;
 }
