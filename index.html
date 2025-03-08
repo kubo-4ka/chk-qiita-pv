@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qiita 記事一覧</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <h1>Qiita 記事一覧 <span id="username"></span></h1>
+    
+    <div class="token-container" id="tokenContainer">
+        <label>アクセストークン: 
+            <input type="password" id="accessToken" placeholder="Qiitaのアクセストークンを入力">
+            <button id="toggleTokenVisibility">👁</button>
+        </label>
+    </div>
+    <button id="fetchButton">取得</button>
+
+    <p id="errorMessage" class="error-message"></p>
+
+    <table>
+        <thead>
+            <tr>
+                <th onclick="sortTable('title')">タイトル<span class="sort-icon" id="sort-title"></span></th>
+                <th onclick="sortTable('tags')">タグ<span class="sort-icon" id="sort-tags"></span></th>
+                <th onclick="sortTable('created_at')">公開日<span class="sort-icon" id="sort-created_at">▼</span></th>
+                <th onclick="sortTable('updated_at')">更新日<span class="sort-icon" id="sort-updated_at"></span></th>
+                <th onclick="sortTable('page_views_count')">閲覧数<span class="sort-icon" id="sort-page_views_count"></span></th>
+                <th onclick="sortTable('likes_count')">いいね数<span class="sort-icon" id="sort-likes_count"></span></th>
+                <th onclick="sortTable('stocks_count')">ストック数<span class="sort-icon" id="sort-stocks_count"></span></th>
+            </tr>
+        </thead>
+        <tbody id="articleTable">
+        </tbody>
+    </table>
+
+    <footer>
+        <p>
+            このページはQiitaのAPIを利用して自分の記事の一覧を取得する、効率化ツールの試作品です。<br><br>
+            公式のAPI利用規約に従ってご利用ください。<br>
+            <a href="https://qiita.com/api/v2/docs" target="_blank">https://qiita.com/api/v2/docs</a><br><br>
+            このページの説明は以下の記事に記載します。<br>
+            <a href="https://qiita.com/kubo4ka/items/8fec35160d9f56347ea4" target="_blank">https://qiita.com/kubo4ka/items/8fec35160d9f56347ea4</a>
+        </p>
+    </footer>
+
+    <script src="assets/script.js" defer></script>
+</body>
+</html>

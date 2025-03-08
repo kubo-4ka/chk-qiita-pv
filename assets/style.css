@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #121212;
+    color: #E0E0E0;
+}
+
+input {
+    padding: 5px;
+    width: 300px;
+}
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+    width: auto;
+}
+
+/* ✅ 目のアイコンのボタン背景を変更して視認性向上 */
+#toggleTokenVisibility {
+    background: #444;   /* ダークグレー */
+    border: 1px solid #666;
+    font-size: 16px;
+    cursor: pointer;
+    width: auto;
+    color: #fff;  /* アイコンの色を白に */
+    padding: 5px 8px;
+    border-radius: 5px;
+}
+
+#toggleTokenVisibility:hover {
+    background: #666;  /* ホバー時に少し明るく */
+}
+
+.token-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #1E1E1E;
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background: #333;
+    cursor: pointer;
+    position: relative;
+}
+
+th:hover {
+    background: #444;
+}
+
+.sort-icon {
+    position: absolute;
+    right: 10px;
+}
+
+/* ✅ リンクの視認性向上 */
+a {
+    color: #1E90FF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #FFD700;
+}
+
+/* ✅ 成功時に非表示にする要素 */
+.hidden {
+    display: none;
+}
