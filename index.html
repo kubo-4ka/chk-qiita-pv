@@ -5,16 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qiita 記事一覧</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script> <!-- ✅ jsPDFを追加 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.27/jspdf.plugin.autotable.min.js"></script> <!-- ✅ 明示的に `autoTable` を追加 -->
 </head>
 <body>
-    <h1>Qiita 記事一覧 <span id="username"></span></h1>
-    
+    <header>
+        <div class="header-left">
+            <h1>Qiita 記事一覧 <span id="username"></span></h1>
+        </div>
+        <div class="header-right">
+            <span id="fetchTime"></span>
+            <button id="exportCSV" class="hidden">CSVダウンロード</button>
+            <button id="exportPDF" class="hidden">PDFダウンロード</button>
+        </div>
+    </header>
+
     <div class="token-container" id="tokenContainer">
         <label>アクセストークン: 
             <input type="password" id="accessToken" placeholder="Qiitaのアクセストークンを入力">
             <button id="toggleTokenVisibility">👁</button>
         </label>
-    </div>
+    </div><br>
     <button id="fetchButton">取得</button>
 
     <p id="errorMessage" class="error-message"></p>

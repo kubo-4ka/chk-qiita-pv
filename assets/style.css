@@ -1,4 +1,9 @@
+html {
+    height: 95%;
+  }
+
 body {
+    height: 100%;
     font-family: Arial, sans-serif;
     margin: 20px;
     background: #121212;
@@ -85,8 +90,11 @@ a:hover {
 }
 
 footer {
-    text-align: center;
+    position: sticky;
+    top: 100vh;
+    /* position: relative; */
     margin-top: 20px;
+    text-align: center;
     padding: 10px;
     background-color: #1E1E1E;
     color: #B0B0B0;
@@ -100,4 +108,55 @@ footer a {
 
 footer a:hover {
     color: #26A69A;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+h1 {
+    font-size: 20px; /* ✅ タイトルのフォントサイズを小さく */
+    margin: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#fetchTime {
+    font-size: 14px;
+    color: #B0B0B0;
+}
+
+#exportCSV, #exportPDF {
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #555; /* ✅ 目立たない色に変更 */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#exportCSV:hover, #exportPDF:hover {
+    background-color: #777; /* ✅ 少し暗く */
+}
+
+@media screen and (max-width: 600px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        margin-top: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

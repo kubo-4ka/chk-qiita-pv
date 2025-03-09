@@ -4,10 +4,23 @@ let ascending = false;  // 初回は降順（新しい順）
 
 document.getElementById("fetchButton").addEventListener("click", fetchArticles);
 document.getElementById("toggleTokenVisibility").addEventListener("click", toggleTokenVisibility);
+document.getElementById("exportCSV").addEventListener("click", exportCSV);
+document.getElementById("exportPDF").addEventListener("click", exportPDF);
 
 function toggleTokenVisibility() {
     let tokenInput = document.getElementById("accessToken");
     tokenInput.type = tokenInput.type === "password" ? "text" : "password";
+}
+
+// ✅ JST でファイル名を作成する関数（アンダースコア修正）
+function getFormattedDateTime() {
+    const now = new Date();
+    return now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+        .replace(/[-T:]/g, "")
+        .replace(/\//g, "")
+        .replace(/\s/g, "_")
+        .replace(/:/g, "")
+        .replace(/(\d{8})(\d{6})/, "$1_$2"); // YYYYMMDD_HHMMSS
 }
 
 async function fetchArticles() {
@@ -38,7 +51,11 @@ async function fetchArticles() {
         document.getElementById("tokenContainer").classList.add("hidden");
         document.getElementById("fetchButton").classList.add("hidden");
 
-        // 記事を取得
+        // ✅ JST で取得時刻を表示
+        const now = new Date();
+        document.getElementById("fetchTime").innerText = `取得日時: ${now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}`;
+
+        // Qiita API から記事を取得
         while (true) {
             const response = await fetch(`https://qiita.com/api/v2/authenticated_user/items?page=${page}&per_page=100`, {
                 headers: { "Authorization": `Bearer ${accessToken}` }
@@ -55,6 +72,10 @@ async function fetchArticles() {
             page++;
         }
 
+        // ✅ 取得成功後にダウンロードボタンを表示
+        document.getElementById("exportCSV").classList.remove("hidden");
+        document.getElementById("exportPDF").classList.remove("hidden");
+
         sortTable(currentSortKey, true); // 初回ソート
     } catch (error) {
         document.getElementById("errorMessage").innerText = error.message;
@@ -66,7 +87,7 @@ async function fetchArticles() {
 }
 
 // ✅ `renderTable` を `window` に登録
-window.renderTable = function() {
+window.renderTable = function () {
     const table = document.getElementById("articleTable");
     table.innerHTML = "";
 
@@ -86,7 +107,7 @@ window.renderTable = function() {
 };
 
 // ✅ `sortTable` も `window` に登録
-window.sortTable = function(key, initial = false) {
+window.sortTable = function (key, initial = false) {
     if (!initial && currentSortKey === key) {
         ascending = !ascending;
     } else {
@@ -106,3 +127,137 @@ window.sortTable = function(key, initial = false) {
 
     renderTable();
 };
+
+function getUsername() {
+    return document.getElementById("username").textContent.trim().replace("@", "") || "unknown_user";
+}
+
+function exportCSV() {
+    const username = getUsername();
+    const filename = `qiita_articles_${getFormattedDateTime()}_${username}.csv`;
+    
+    let csvContent = "タイトル,タグ,公開日,更新日,閲覧数,いいね数,ストック数\n";
+    articles.forEach(article => {
+        csvContent += `"${article.title}","${article.tags.map(tag => tag.name).join(", ")}","${article.created_at}","${article.updated_at}",${article.page_views_count || 0},${article.likes_count},${article.stocks_count}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+}
+
+// ✅ Uint8Array を Base64 に変換する関数
+function arrayBufferToBase64(buffer) {
+    return new Promise((resolve) => {
+        const blob = new Blob([buffer], { type: "application/octet-stream" });
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(",")[1]);
+        reader.readAsDataURL(blob);
+    });
+}
+
+// ✅ PDFの日本語対応（フォント埋め込み & 初回ロードエラー修正）
+async function exportPDF() {
+    const username = getUsername();
+    const filename = `qiita_articles_${getFormattedDateTime()}_${username}.pdf`;
+    console.log("filename: " + filename);
+
+    console.log("window.jspdf: " + window.jspdf);
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("PDFライブラリが読み込まれていません。");
+        return;
+    }
+
+    console.log("window.jspdf.jsPDF.API.autoTable: " + window.jspdf.jsPDF.API.autoTable);
+    if (!window.jspdf.jsPDF.API.autoTable) {
+        alert("PDFの表描画機能（autoTable）が正しくロードされていません。ページをリロードしてください。");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "A4"
+    });
+
+    try {
+        // ✅ フォントを正しく `Base64` に変換
+        const response = await fetch("assets/ipaexg.ttf");
+        const buffer = await response.arrayBuffer();
+        const base64Font = await arrayBufferToBase64(buffer);
+
+        // ✅ jsPDF にフォントを登録
+        doc.addFileToVFS("ipaexg.ttf", base64Font);
+        doc.addFont("ipaexg.ttf", "IPAexGothic", "normal");
+        doc.setFont("IPAexGothic");
+
+        generatePDF(doc, filename);
+    } catch (error) {
+        console.error("フォントの読み込みに失敗しました:", error);
+        alert("フォントの読み込みに失敗しました。デフォルトフォントで出力します。");
+        doc.setFont("times", "normal");
+        generatePDF(doc, filename);
+    }
+}
+
+function generatePDF(doc, filename) {
+    const username = getUsername();
+    const fetchTime = document.getElementById("fetchTime").textContent.trim() || "取得日時不明";
+
+    // ✅ 画面と同じようにヘッダー情報を追加
+    // ✅ PDF全体の背景を黒に
+    doc.setFillColor(0, 0, 0); // 黒背景
+    doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F"); // 全体を塗りつぶし
+    doc.setTextColor(255, 255, 255); // 文字を白に
+    doc.setFontSize(14);
+    doc.text(`Qiita 記事一覧 (${username})`, 10, 10);
+    doc.setFontSize(10);
+    doc.text(fetchTime, 10, 20); // 取得日時
+
+    const tableData = articles.map(article => [
+        article.title,
+        article.tags.map(tag => tag.name).join(", "),
+        new Date(article.created_at).toLocaleDateString(),
+        new Date(article.updated_at).toLocaleDateString(),
+        article.page_views_count || 0,
+        article.likes_count,
+        article.stocks_count
+    ]);
+
+    doc.autoTable({
+        head: [["タイトル", "タグ", "公開日", "更新日", "閲覧数", "いいね数", "ストック数"]],
+        body: tableData,
+        startY: 30, // ✅ 取得日時の下に表を配置
+        styles: { 
+            font: "IPAexGothic", 
+            fontSize: 10, 
+            cellWidth: 'wrap', 
+            textColor: [255, 255, 255], // ✅ 文字を白に
+            fillColor: [34, 34, 34] // ✅ 通常のセルをダークグレーに
+        },
+        headStyles: { 
+            fillColor: [0, 0, 0], // ✅ ヘッダーの背景を黒に
+            textColor: [255, 255, 255], // ✅ ヘッダーの文字を白に
+            fontSize: 11
+        },
+        alternateRowStyles: { fillColor: [26, 26, 26] }, // ✅ 偶数行の背景をダークグレー
+        rowStyles: { fillColor: [46, 46, 46] }, // ✅ 奇数行の背景を黒に
+
+        columnStyles: {
+            0: { cellWidth: 60 },  // タイトル
+            1: { cellWidth: 40 },  // タグ
+            2: { cellWidth: 25 },  // 公開日
+            3: { cellWidth: 25 },  // 更新日
+            4: { cellWidth: 20 },  // 閲覧数
+            5: { cellWidth: 20 },  // いいね数
+            6: { cellWidth: 20 },  // ストック数
+        },
+        margin: { left: 0, right: 0 }, // 余白
+        overflow: 'linebreak'  // ✅ 長すぎるタグを自動改行
+    });
+
+    doc.save(filename);
+}
