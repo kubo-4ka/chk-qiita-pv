@@ -15,12 +15,28 @@ function toggleTokenVisibility() {
 // ✅ JST でファイル名を作成する関数（アンダースコア修正）
 function getFormattedDateTime() {
     const now = new Date();
-    return now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-        .replace(/[-T:]/g, "")
-        .replace(/\//g, "")
-        .replace(/\s/g, "_")
-        .replace(/:/g, "")
-        .replace(/(\d{8})(\d{6})/, "$1_$2"); // YYYYMMDD_HHMMSS
+    const options = {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23" // 24時間制
+    };
+
+    const parts = new Intl.DateTimeFormat("ja-JP", options).formatToParts(now);
+    const get = type => parts.find(p => p.type === type)?.value.padStart(2, "0");
+
+    const yyyy = get("year");
+    const mm = get("month");
+    const dd = get("day");
+    const hh = get("hour");
+    const min = get("minute");
+    const ss = get("second");
+
+    return `${yyyy}${mm}${dd}_${hh}${min}${ss}`;
 }
 
 async function fetchArticles() {
